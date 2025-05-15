@@ -4,13 +4,27 @@ import webbrowser
 import pprint
 from boto3.session import Session
 
-sso_url='https://x-xxxxxxxxx.awsapps.com/start'
-sso_role='readonly'
+sso_url='https://XXXXXXXXXXXX.awsapps.com/start'
+sso_role='network'
 
 
 client = boto3.client('sso-oidc')
-response = client.register_client(clientName='my-client', clientType='public')
-response = client.start_device_authorization(clientId=response['clientId'], clientSecret=response['clientSecret'], startUrl=sso_url)
+response = client.register_client(
+    clientName='my-client',
+    clientType='public'
+)
+client_id = response['clientId']
+client_secret = response['clientSecret']
+
+# Start the device authorization
+response = client.start_device_authorization(
+    clientId=client_id,
+    clientSecret=client_secret,
+    startUrl=sso_url
+)
+device_code = response['deviceCode']
+user_code = response['userCode']
+verification_uri = response['verificationUri']
 
 #DEBUG: pprint.pprint(response)
 webbrowser.open(response['verificationUriComplete'], autoraise=True)
@@ -19,10 +33,10 @@ token = None
 while not token:
     try:
         response = client.create_token(
-            clientId=response['clientId'],
-            clientSecret=response['clientSecret'],
+            clientId=client_id,
+            clientSecret=client_secret,
             grantType='urn:ietf:params:oauth:grant-type:device_code',
-            deviceCode=response['deviceCode']
+            deviceCode=device_code
         )
         token = response['accessToken']
     except client.exceptions.AuthorizationPendingException:
@@ -54,3 +68,4 @@ for a in response['accountList']:
                     VpcName = i['Value']
         #Account ID, Account Name, VPC ID, VPC CIDR, VPC Name
         print(f"{a['accountId']},{a['accountName']},{v['VpcId']},{v['CidrBlock']},{VpcName}")
+
