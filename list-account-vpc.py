@@ -4,13 +4,13 @@ import webbrowser
 import pprint
 from boto3.session import Session
 
-sso-url='https://x-xxxxxxxxx.awsapps.com/start'
-sso-role='readonly'
+sso_url='https://x-xxxxxxxxx.awsapps.com/start'
+sso_role='readonly'
 
 
 client = boto3.client('sso-oidc')
 response = client.register_client(clientName='my-client', clientType='public')
-response = client.start_device_authorization(clientId=response['clientId'], clientSecret=response['clientSecret'], startUrl=sso-url)
+response = client.start_device_authorization(clientId=response['clientId'], clientSecret=response['clientSecret'], startUrl=sso_url)
 
 #DEBUG: pprint.pprint(response)
 webbrowser.open(response['verificationUriComplete'], autoraise=True)
@@ -38,7 +38,7 @@ for a in response['accountList']:
     #print(f"{a['accountId']},{a['accountName']}")
     #DEBUG: pprint.pprint (account_roles['roleList'])
     try:
-        role_creds = client1.get_role_credentials(roleName=sso-role, accountId=a['accountId'],accessToken=token)['roleCredentials']
+        role_creds = client1.get_role_credentials(roleName=sso_role, accountId=a['accountId'],accessToken=token)['roleCredentials']
         #DEBUG: pprint.pprint(role_creds)
     except Exception as e:
         print(f"{a['accountId']},{a['accountName']},ERROR,{e},,")
