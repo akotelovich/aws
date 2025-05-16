@@ -6,6 +6,7 @@ from boto3.session import Session
 
 sso_url='https://XXXXXXXXXXXX.awsapps.com/start'
 sso_role='network'
+aws_region = 'eu-central-1'
 
 
 client = boto3.client('sso-oidc')
@@ -55,9 +56,9 @@ for a in response['accountList']:
         role_creds = client1.get_role_credentials(roleName=sso_role, accountId=a['accountId'],accessToken=token)['roleCredentials']
         #DEBUG: pprint.pprint(role_creds)
     except Exception as e:
-        print(f"{a['accountId']},{a['accountName']},ERROR,{e},,")
+        print(f"{a['accountId']},{a['accountName']},ERROR,ERROR,{e}")
 
-    ec2 = boto3.client('ec2', region_name='eu-central-1', aws_session_token=role_creds['sessionToken'], aws_account_id=a['accountId'], aws_access_key_id=role_creds['accessKeyId'], aws_secret_access_key=role_creds['secretAccessKey'])
+    ec2 = boto3.client('ec2', region_name=aws_region, aws_session_token=role_creds['sessionToken'], aws_account_id=a['accountId'], aws_access_key_id=role_creds['accessKeyId'], aws_secret_access_key=role_creds['secretAccessKey'])
     vpcs = ec2.describe_vpcs()
 
     for v in vpcs['Vpcs']:
